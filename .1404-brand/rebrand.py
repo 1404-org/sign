@@ -191,7 +191,41 @@ s = s.replace("--primary-foreground: 95.08 71.08% 10%;", "--primary-foreground: 
 s = s.replace("--ring: 95.08 71.08% 67.45%;", "--ring: 26.9 46.5% 60.4%;")
 for k, l in ls.items():
     s = re.sub(rf"--new-primary-{k}: [^;]+;", f"--new-primary-{k}: 27, 47%, {round(l*100)}%;", s)
+s = s.replace("--field-card: 95 74% 90%;", "--field-card: 27 47% 92%;")
+s = s.replace("--field-card-border: 95.08 71.08% 67.45%;", "--field-card-border: 26.9 46.5% 60.4%;")
+s = s.replace("--secondary-foreground: 95.08 71.08% 67.45%;", "--secondary-foreground: 26.9 46.5% 60.4%;")
+s = s.replace("--accent-foreground: 95.08 71.08% 67.45%;", "--accent-foreground: 26.9 46.5% 60.4%;")
 th.write_text(s)
+
+s = th.read_text()
+s = s.replace("--card-border-tint: 112 205 159;", "--card-border-tint: 201 149 107;")
+th.write_text(s)
+
+# Background pattern on sign-in pages: desaturate Documenso's green to a warm neutral, keep alpha.
+try:
+    from PIL import Image
+    bp = ROOT / "packages/assets/images/background-pattern.png"
+    im = Image.open(bp).convert("RGBA")
+    r, g, b, a = im.split()
+    vis = [c for n, c in sorted(im.getcolors(1 << 24), reverse=True)[:20] if c[3] > 0]
+    if vis and sum(c[1] - c[0] for c in vis) / len(vis) > 8:  # still green-tinted
+        grey = Image.merge("RGB", (r, g, b)).convert("L")
+        warm = Image.merge("RGBA", (grey.point(lambda v: int(v * 0.96)), grey.point(lambda v: int(v * 0.93)), grey.point(lambda v: int(v * 0.90)), a))
+        warm.save(bp, optimize=True)
+except ImportError:
+    missing.append("background-pattern.png: Pillow not installed, pattern left green")
+
+# Hex mirror of the theme, used by emails and PDF field rendering.
+edit("packages/lib/constants/theme.ts", [
+    ("fieldCard: '#e2f8d3',", "fieldCard: '#F4ECE5',"),
+    ("fieldCardBorder: '#a2e771',", "fieldCardBorder: '#C9956B',"),
+    ("primary: '#a2e771',", "primary: '#C9956B',"),
+    ("primaryForeground: '#162c07',", "primaryForeground: '#111010',"),
+    ("ring: '#a2e771',", "ring: '#C9956B',"),
+])
+for f in ["apps/remix/app/components/general/settings-upsell/sso-portal-upsell.tsx",
+          "apps/remix/app/components/general/settings-upsell/branding-upsell.tsx"]:
+    p2 = ROOT / f; p2.write_text(p2.read_text().replace("'#A2E771'", "'#C9956B'"))
 
 # 7. AGPL-3.0 section 13: offer the source to every network user (sign-in pages, signing pages, mobile menu).
 SRC_LINK = (f'<a href="{SOURCE}" target="_blank" rel="noopener" className="underline underline-offset-2">'
