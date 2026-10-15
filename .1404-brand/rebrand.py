@@ -19,9 +19,11 @@ def edit(path, pairs, count_ok=True):
         sys.exit(f"refusing to edit {p}: packages/ee is under the Documenso commercial license")
     s = p.read_text()
     orig = s
+    squash = lambda t: re.sub(r"\s+", "", t)
     for old, new in pairs:
-        if new in s:
-            continue  # already applied (keeps the script idempotent for insertions)
+        # already applied? (also after the repo's formatter has reflowed our insertion)
+        if new in s or squash(new) in squash(s) or (SOURCE in new and SOURCE in s and SOURCE not in old):
+            continue
         if old in s:
             s = s.replace(old, new)
         elif new not in s:
@@ -187,7 +189,7 @@ block = re.search(r"documenso: \{.*?\n        \},", s, re.S).group(0)
 new = "documenso: {\n          DEFAULT: '#C9956B',\n" + "".join(f"          {k}: '{hexof(l)}',\n" for k, l in ls.items()) + "        },"
 s = s.replace(block, new)
 # Tailwind's stock green/lime/emerald (success states, status badges) -> the same copper scale.
-if "green: {  // 1404" not in s:
+if not re.search(r"green:\s*\{\s*//\s*1404", s):
     alias = "".join(f"        {c}: {{  // 1404\n          DEFAULT: '#C9956B',\n" + "".join(f"          {k}: '{hexof(l)}',\n" for k, l in ls.items()) + "        },\n"
                     for c in ("green", "lime", "emerald"))
     s = s.replace("        documenso: {", alias + "        documenso: {", 1)
@@ -263,12 +265,12 @@ try:
             # cover Documenso's emblem in the centre with the 1404 wordmark
             cx, cy = im.width // 2, im.height // 2
             rad = int(min(im.size) * 0.17)
-            bg = im.getpixel((cx, cy - int(rad * 1.6)))
+            bg = (251, 247, 244, 255)  # pale copper, matches the badge interior
             d = ImageDraw.Draw(im)
             d.ellipse([cx - rad, cy - rad, cx + rad, cy + rad], fill=(*bg[:3], 255))
             ttf = out_dir / "InstrumentSerif-Regular.ttf"
             if ttf.exists():
-                ft = ImageFont.truetype(str(ttf), int(rad * 0.9))
+                ft = ImageFont.truetype(str(ttf), int(rad * 0.85))
                 l, t, r_, b_ = d.textbbox((0, 0), NAME, font=ft)
                 d.text((cx - (r_ - l) / 2 - l, cy - (b_ - t) / 2 - t), NAME, font=ft, fill=(201, 149, 107, 255))
         im.save(p2, optimize=True)
