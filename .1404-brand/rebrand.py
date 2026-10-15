@@ -185,7 +185,13 @@ tw = ROOT / "packages/tailwind-config/index.cjs"
 s = tw.read_text()
 block = re.search(r"documenso: \{.*?\n        \},", s, re.S).group(0)
 new = "documenso: {\n          DEFAULT: '#C9956B',\n" + "".join(f"          {k}: '{hexof(l)}',\n" for k, l in ls.items()) + "        },"
-tw.write_text(s.replace(block, new))
+s = s.replace(block, new)
+# Tailwind's stock green/lime/emerald (success states, status badges) -> the same copper scale.
+if "green: {  // 1404" not in s:
+    alias = "".join(f"        {c}: {{  // 1404\n          DEFAULT: '#C9956B',\n" + "".join(f"          {k}: '{hexof(l)}',\n" for k, l in ls.items()) + "        },\n"
+                    for c in ("green", "lime", "emerald"))
+    s = s.replace("        documenso: {", alias + "        documenso: {", 1)
+tw.write_text(s)
 th = ROOT / "packages/ui/styles/theme.css"
 s = th.read_text()
 s = s.replace("--primary: 95.08 71.08% 67.45%;", "--primary: 26.9 46.5% 60.4%;")
@@ -217,6 +223,69 @@ try:
 except ImportError:
     missing.append("background-pattern.png: Pillow not installed, pattern left green")
 
+# Green raster art (email icons, signing celebration, certificate PDF art, Android icons) -> copper.
+def green_share(im):
+    small = im.copy(); small.thumbnail((200, 200))
+    px = [p for p in small.getdata() if p[3] > 40]
+    g = sum(1 for r, gg, b, a in px
+            if (h := colorsys.rgb_to_hsv(r / 255, gg / 255, b / 255))[1] > 0.25 and h[2] > 0.3 and 0.17 < h[0] < 0.45)
+    return g / len(px) if px else 0
+
+
+def to_copper(im):
+    out = im.copy(); px = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = px[x, y]
+            h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+            if s > 0.08 and 0.15 < h < 0.48:
+                nr, ng, nb = colorsys.hsv_to_rgb(27 / 360, min(s * 1.05, 0.62), v * 0.93)
+                px[x, y] = (round(nr * 255), round(ng * 255), round(nb * 255), a)
+    return out
+
+
+try:
+    from PIL import Image, ImageDraw, ImageFont
+    out_dir = ROOT / ".1404-brand/out"
+    for f in ["apps/remix/public/static/completed.png", "packages/assets/static/completed.png", "packages/email/static/completed.png",
+              "apps/remix/public/static/mail-open.png", "packages/email/static/mail-open.png",
+              "packages/assets/images/connections.png", "packages/assets/images/card-paid-figure.png",
+              "packages/assets/images/card-sharing-figure.png", "packages/assets/images/profile-claim-teaser.png",
+              "packages/assets/images/signing-celebration.png"]:
+        p2 = ROOT / f
+        if not p2.exists():
+            missing.append(f"{f}: not found"); continue
+        im = Image.open(p2).convert("RGBA")
+        if green_share(im) <= 0.01:
+            continue
+        im = to_copper(im)
+        if f.endswith("signing-celebration.png"):
+            # cover Documenso's emblem in the centre with the 1404 wordmark
+            cx, cy = im.width // 2, im.height // 2
+            rad = int(min(im.size) * 0.17)
+            bg = im.getpixel((cx, cy - int(rad * 1.6)))
+            d = ImageDraw.Draw(im)
+            d.ellipse([cx - rad, cy - rad, cx + rad, cy + rad], fill=(*bg[:3], 255))
+            ttf = out_dir / "InstrumentSerif-Regular.ttf"
+            if ttf.exists():
+                ft = ImageFont.truetype(str(ttf), int(rad * 0.9))
+                l, t, r_, b_ = d.textbbox((0, 0), NAME, font=ft)
+                d.text((cx - (r_ - l) / 2 - l, cy - (b_ - t) / 2 - t), NAME, font=ft, fill=(201, 149, 107, 255))
+        im.save(p2, optimize=True)
+    for size in (192, 512):
+        src = out_dir / "icon-512.png"
+        if src.exists():
+            for d_ in ("apps/remix/public", "packages/assets"):
+                Image.open(src).resize((size, size), Image.LANCZOS).save(ROOT / d_ / f"android-chrome-{size}x{size}.png")
+    for wmf in ["apps/remix/public/site.webmanifest", "packages/assets/site.webmanifest"]:
+        p2 = ROOT / wmf
+        if p2.exists():
+            t = re.sub(r'(?i)#A2E771', '#C9956B', p2.read_text())
+            t = t.replace('"name": "Documenso"', f'"name": "{NAME}"').replace('"short_name": "Documenso"', f'"short_name": "{NAME}"')
+            p2.write_text(t)
+except ImportError:
+    missing.append("raster recolour: Pillow not installed")
+
 # Hex mirror of the theme, used by emails and PDF field rendering.
 edit("packages/lib/constants/theme.ts", [
     ("fieldCard: '#e2f8d3',", "fieldCard: '#F4ECE5',"),
@@ -227,7 +296,7 @@ edit("packages/lib/constants/theme.ts", [
 ])
 for f in ["apps/remix/app/components/general/settings-upsell/sso-portal-upsell.tsx",
           "apps/remix/app/components/general/settings-upsell/branding-upsell.tsx"]:
-    p2 = ROOT / f; p2.write_text(p2.read_text().replace("'#A2E771'", "'#C9956B'"))
+    p2 = ROOT / f; p2.write_text(p2.read_text().replace("'#A2E771'", "'#C9956B'").replace("'#162C07'", "'#111010'").replace("'#F2FBEA'", "'#F4ECE5'"))
 
 # 7. AGPL-3.0 section 13: offer the source to every network user (sign-in pages, signing pages, mobile menu).
 SRC_LINK = (f'<a href="{SOURCE}" target="_blank" rel="noopener" className="underline underline-offset-2">'

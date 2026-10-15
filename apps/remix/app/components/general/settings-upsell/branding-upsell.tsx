@@ -12,8 +12,8 @@ const DEMO_BRANDS = [
     letter: 'D',
     domain: 'noreply@app.documenso.com',
     accent: '#C9956B',
-    ink: '#162C07',
-    tint: '#F2FBEA',
+    ink: '#111010',
+    tint: '#F4ECE5',
     sheen: 'rgba(162, 231, 113, 0.32)',
   },
   {
