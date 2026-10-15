@@ -15,7 +15,7 @@ export type TeamDeleteEmailProps = {
 
 export const TeamDeleteEmailTemplate = ({
   assetBaseUrl = 'http://localhost:3002',
-  baseUrl = 'https://documenso.com',
+  baseUrl = 'https://sign.1404.io',
   teamUrl = 'demo',
 }: TeamDeleteEmailProps) => {
   const { _ } = useLingui();

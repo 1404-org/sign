@@ -1,4 +1,5 @@
 import backgroundPattern from '@documenso/assets/images/background-pattern.png';
+import { Trans } from '@lingui/react/macro';
 import { Outlet } from 'react-router';
 
 export default function Layout() {
@@ -20,6 +21,18 @@ export default function Layout() {
         <div className="relative w-full">
           <Outlet />
         </div>
+
+        <p className="relative mt-8 text-center text-muted-foreground text-xs">
+          1404 ·{' '}
+          <a
+            href="https://github.com/1404-org/sign"
+            target="_blank"
+            rel="noopener"
+            className="underline underline-offset-2"
+          >
+            <Trans>Source code (AGPL)</Trans>
+          </a>
+        </p>
       </div>
     </main>
   );

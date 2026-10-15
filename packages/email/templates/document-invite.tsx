@@ -27,7 +27,7 @@ export const DocumentInviteEmailTemplate = ({
   inviterName = 'Lucas Smith',
   inviterEmail = 'lucas@documenso.com',
   documentName = 'Open Source Pledge.pdf',
-  signDocumentLink = 'https://documenso.com',
+  signDocumentLink = 'https://sign.1404.io',
   assetBaseUrl = 'http://localhost:3002',
   customBody,
   role,

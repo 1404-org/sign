@@ -18,7 +18,7 @@ export type OrganisationLeaveEmailProps = {
 
 export const OrganisationLeaveEmailTemplate = ({
   assetBaseUrl = 'http://localhost:3002',
-  baseUrl = 'https://documenso.com',
+  baseUrl = 'https://sign.1404.io',
   memberName = 'John Doe',
   memberEmail = 'johndoe@documenso.com',
   organisationName = 'Organisation Name',
@@ -26,7 +26,7 @@ export const OrganisationLeaveEmailTemplate = ({
 }: OrganisationLeaveEmailProps) => {
   const { _ } = useLingui();
 
-  const previewText = msg`A member has left your organisation on Documenso`;
+  const previewText = msg`A member has left your organisation on 1404`;
 
   return (
     <Html>

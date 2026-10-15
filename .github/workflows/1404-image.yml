@@ -1,0 +1,50 @@
+# 1404 fork: build the signing image (arm64, for the 1404-edge box) and publish to GHCR.
+# Trigger: push a tag like v2.19.0-1404.1, or run manually. Upstream workflows were removed in this fork.
+name: 1404 image
+
+on:
+  push:
+    tags: ['v*-1404.*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag
+        id: tag
+        run: |
+          REF="${GITHUB_REF_NAME}"
+          case "$REF" in v*-1404.*) ;; *) REF="dev-$(git rev-parse --short HEAD)";; esac
+          echo "tag=$REF" >> "$GITHUB_OUTPUT"
+
+      # Telemetry build args are deliberately NOT passed: this image never phones home.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: linux/arm64
+          push: true
+          provenance: false
+          tags: ghcr.io/1404-org/sign:${{ steps.tag.outputs.tag }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/1404-org/sign
+            org.opencontainers.image.licenses=AGPL-3.0
+            org.opencontainers.image.description=1404 document signing (fork of Documenso, branding changes only)
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

@@ -12,15 +12,15 @@ export function meta({ params: { slug } }: Route.MetaArgs) {
   }
 
   return [
-    { title: 'Documenso - Share' },
-    { description: 'I just signed a document in style with Documenso!' },
+    { title: '1404 - Share' },
+    { description: 'I just signed a document with 1404' },
     {
       property: 'og:title',
-      content: 'Documenso - Join the open source signing revolution',
+      content: '1404 document signing',
     },
     {
       property: 'og:description',
-      content: 'I just signed with Documenso!',
+      content: 'I just signed with 1404',
     },
     {
       property: 'og:type',
@@ -44,7 +44,7 @@ export function meta({ params: { slug } }: Route.MetaArgs) {
     },
     {
       name: 'twitter:description',
-      content: 'I just signed with Documenso!',
+      content: 'I just signed with 1404',
     },
   ];
 }
@@ -70,7 +70,7 @@ export const loader = async ({ request, params: { slug } }: Route.LoaderArgs) =>
   }
 
   // Is hardcoded because this whole meta is hardcoded anyway for Documenso.
-  throw redirect('https://documenso.com');
+  throw redirect('https://1404.io');
 };
 
 export default function SharePage() {

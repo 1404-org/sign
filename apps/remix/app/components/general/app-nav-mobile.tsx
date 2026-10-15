@@ -90,7 +90,7 @@ export const AppNavMobile = ({ isMenuOpen, onMenuOpenChange }: AppNavMobileProps
     <Sheet open={isMenuOpen} onOpenChange={onMenuOpenChange}>
       <SheetContent className="flex w-full max-w-[350px] flex-col">
         <Link to="/" onClick={handleMenuItemClick}>
-          <img src={LogoImage} alt="Documenso Logo" className="dark:invert" width={170} height={25} />
+          <img src={LogoImage} alt="1404 logo" className="dark:invert" width={170} height={25} />
         </Link>
 
         <div className="mt-8 flex w-full flex-col items-start gap-y-4">
@@ -124,9 +124,9 @@ export const AppNavMobile = ({ isMenuOpen, onMenuOpenChange }: AppNavMobileProps
           </div>
 
           <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} Documenso, Inc.
+            © {new Date().getFullYear()} 1404
             <br />
-            <Trans>All rights reserved.</Trans>
+            <a href="https://github.com/1404-org/sign" target="_blank" rel="noopener" className="underline underline-offset-2"><Trans>Source code (AGPL)</Trans></a>
           </p>
         </div>
       </SheetContent>
