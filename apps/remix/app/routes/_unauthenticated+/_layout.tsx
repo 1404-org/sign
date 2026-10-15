@@ -45,6 +45,18 @@ export default function Layout() {
             <Trans>Source code (AGPL)</Trans>
           </a>
         </p>
+
+        <p className="relative mt-8 text-center text-muted-foreground text-xs">
+          1404 ·{' '}
+          <a
+            href="https://github.com/1404-org/sign"
+            target="_blank"
+            rel="noopener"
+            className="underline underline-offset-2"
+          >
+            <Trans>Source code (AGPL)</Trans>
+          </a>
+        </p>
       </div>
     </main>
   );

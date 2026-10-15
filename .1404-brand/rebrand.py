@@ -164,6 +164,8 @@ visible_lines("apps/remix/app/routes/_share+/share.$slug.tsx", repl=(
     (r"Documenso - Share", f"{NAME} - Share"),
 ))
 edit("apps/remix/app/routes/_share+/share.$slug.tsx", [("https://documenso.com", SITE)])
+wm = ROOT / "apps/remix/public/site.webmanifest"
+wm.write_text(re.sub(r'(?i)#A2E771', '#C9956B', wm.read_text()))
 edit("apps/remix/public/site.webmanifest", [('"name": "Documenso"', f'"name": "{NAME}"'), ('"short_name": "Documenso"', f'"short_name": "{NAME}"')])
 
 # 5. Default signing reason + sender name.
